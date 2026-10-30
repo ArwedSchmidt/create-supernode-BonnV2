@@ -18,9 +18,9 @@
     name: nf_conntrack
     state: present
 
-- name: extend /etc/iproute2/rt_tables
+- name: extend /usr/share/iproute2/rt_tables
   lineinfile:
-    path: /etc/iproute2/rt_tables
+    path: /usr/share/iproute2/rt_tables
     state: present
     regexp: '^90\s'
     line: '90 freifunk'
