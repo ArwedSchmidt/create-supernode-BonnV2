@@ -1,22 +1,6 @@
 ---
 # tasks file for wireguard
 
-
-# Add specified repository into sources list using specified filename.
-- name: Add wireguard repository to system
-  apt_repository:
-    repo: deb http://deb.debian.org/debian/ unstable main
-    state: present
-    filename: wireguard
-
-- name: Add pinning for the repository
-  copy:
-    dest: /etc/apt/preferences.d/limit-unstable
-    content: |
-      Package: *
-      Pin: release a=unstable
-      Pin-Priority: 90
-
 - name: Update repositories on hosts
   apt:
     update_cache: yes
@@ -135,14 +119,14 @@
     mode: 0644
 
 - name: Ensure server tokens are off for nginx
-lineinfile:
+  lineinfile:
     path: /etc/nginx/nginx.conf
     line: server_tokens off;
     insertafter: include /etc/nginx/sites-enabled/
 
 - name: install certbot for https certificate
   package:
-    name: certbot 
+    name: certbot
     state: latest
   when: "wireguard_nginx_port == '443'"
 
@@ -190,7 +174,7 @@ lineinfile:
     user: root
 
 - name: delete index.nginx-debian.html in /var/www
-  file: 
+  file:
     path: /var/www/html/index.nginx-debian.html
     state: absent
 
@@ -202,9 +186,9 @@ lineinfile:
     line: 'www-data ALL=(ALL) NOPASSWD: /usr/bin/wg, /sbin/ip, /sbin/brctl'
 
 - name: Add a cronjob to remove old sessions
-  cron: 
-    name: "check every 10 minutes for old inactive wireguard session (last handshake older than 1 hour)" 
-    minute: */10
+  cron:
+    name: "check every 10 minutes for old inactive wireguard session (last handshake older than 1 hour)"
+    minute: "*/10"
     job: "wg set wg0 peer  \"$(wg |  awk 'BEGIN {RS=\"\"} /hour/ {print $2}'  | head -n 1)\" remove"
     state: present
     user: root
@@ -212,12 +196,12 @@ lineinfile:
 - name: Add a cronjob to remove old key after reboot 
   cron:
     name: "check for old wireguard session after reboot"
-    special_time: reboot 
+    special_time: reboot
     job: "sleep 300 && /root/remove_wg0_keys.sh"
     state: present
     user: root
 
-- name: copy script to root 
+- name: copy script to root
   copy:
     src: "opt/"
     dest: "/opt"
